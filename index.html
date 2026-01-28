@@ -169,7 +169,7 @@
     <div class="header-content">
         <h1>TECHIES INVESTMENTS</h1>
         <div>
-            <span class="badge">Y10 • Y12 • Y16 Bars</span>
+            <span class="badge">Y10 â€¢ Y12 â€¢ Y16 Bars</span>
             <span class="badge">2026-2028</span>
         </div>
         <p style="margin-top: 0.5rem; opacity: 0.9;">3-Phase Program Tracker (31 Months)</p>
@@ -352,7 +352,7 @@
                 <h3 class="card-title">Acquisition Summary</h3>
                 <div style="padding: 1.5rem; background: rgba(255,255,255,0.03); border-radius: 0.75rem;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-                        <span>Regular Purchases (22 months × 7)</span>
+                        <span>Regular Purchases (22 months Ã— 7)</span>
                         <span class="amount highlight-blue">154 bars</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
@@ -439,7 +439,7 @@ const CONFIG = {
             Allan: 0,            // EDIT: Add amounts here as they pay
             Sudi: 0,             // EDIT: Example: Change to 160000 after two payments of 80k
             Edmond: 0,           // EDIT: Add amounts here
-            Sam: 0               // EDIT: Add amounts here
+            Sam: 100000               // EDIT: Add amounts here
         },
         
         // PAYMENT LOG - Track individual transactions (optional, for display)
@@ -523,7 +523,7 @@ function initDashboard() {
             <div class="phase-header">
                 <div>
                     <div class="phase-title">Phase 1: Y10 Bars</div>
-                    <div class="phase-subtitle">Jan 2026 • ${p1.totalBars} Bars</div>
+                    <div class="phase-subtitle">Jan 2026 â€¢ ${p1.totalBars} Bars</div>
                 </div>
                 <span class="phase-status ${calc.isExcess ? 'status-surplus' : (calc.isComplete ? 'status-completed' : 'status-active')}">
                     ${calc.isExcess ? 'EXCESS' : (calc.isComplete ? 'COMPLETE' : 'ACTIVE')}
@@ -550,7 +550,7 @@ function initDashboard() {
             <div class="phase-header">
                 <div>
                     <div class="phase-title">Phase 2: Y12 Bars</div>
-                    <div class="phase-subtitle">Feb-Aug 2026 • 7 Months</div>
+                    <div class="phase-subtitle">Feb-Aug 2026 â€¢ 7 Months</div>
                 </div>
                 <span class="phase-status ${calc.isComplete ? 'status-active' : 'status-pending'}">
                     ${calc.isComplete ? 'READY' : 'UPCOMING'}
@@ -562,7 +562,7 @@ function initDashboard() {
                     'Waiting for Phase 1 completion'}
             </div>
             <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
-                Monthly: ${formatMoney(CONFIG.phase2.monthlyTarget)} • 81 bars total
+                Monthly: ${formatMoney(CONFIG.phase2.monthlyTarget)} â€¢ 81 bars total
             </div>
         </div>
 
@@ -575,7 +575,7 @@ function initDashboard() {
                 <span class="phase-status status-pending">FUTURE</span>
             </div>
             <div style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">
-                23 months • 160 bars • Ends July 2028
+                23 months â€¢ 160 bars â€¢ Ends July 2028
             </div>
             <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
                 Long-term accumulation phase
