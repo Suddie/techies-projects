@@ -21,7 +21,6 @@
             padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
         .header-content { max-width: 1200px; margin: 0 auto; }
-        .header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
         .badge {
             display: inline-block; padding: 0.25rem 0.75rem;
             background: rgba(255,255,255,0.2); border-radius: 9999px;
@@ -67,24 +66,21 @@
         .status-active { background: rgba(16, 185, 129, 0.2); color: var(--success); }
         .status-pending { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
         .status-completed { background: rgba(100, 116, 139, 0.2); color: var(--text-muted); }
+        .status-surplus { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
         
         .progress-container { margin: 1.5rem 0; }
         .progress-label { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted); }
         .progress-bar-bg {
-            height: 8px; background: rgba(255,255,255,0.1);
+            height: 12px; background: rgba(255,255,255,0.1);
             border-radius: 9999px; overflow: hidden;
         }
         .progress-bar-fill {
             height: 100%; background: linear-gradient(90deg, var(--success), #34d399);
             border-radius: 9999px; transition: width 0.5s ease;
         }
-        .phase-stats {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
-            margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
+        .progress-bar-fill.excess {
+            background: linear-gradient(90deg, #8b5cf6, #a78bfa);
         }
-        .stat { text-align: center; }
-        .stat-value { font-size: 1.25rem; font-weight: 700; color: var(--text); }
-        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
         
         .card {
             background: var(--card); border: 1px solid var(--border);
@@ -105,6 +101,7 @@
         .highlight-green { color: var(--success); }
         .highlight-yellow { color: var(--warning); }
         .highlight-blue { color: #60a5fa; }
+        .highlight-purple { color: #a78bfa; }
         
         .member-grid { display: grid; gap: 1rem; }
         .member-item {
@@ -117,22 +114,21 @@
             font-size: 0.75rem; font-weight: 600;
         }
         .alert {
-            padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem;
+            padding: 1.2rem; border-radius: 0.75rem; margin-bottom: 1.5rem;
             border-left: 4px solid;
         }
-        .alert-info { background: rgba(37, 99, 235, 0.1); border-color: var(--primary); color: #93c5fd; }
-        .form-row { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
-        select, input[type="number"] {
-            padding: 0.75rem; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border); color: var(--text);
-            border-radius: 0.5rem; font-size: 1rem; flex: 1;
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1); border-color: var(--success); color: #6ee7b7;
         }
-        button {
-            padding: 0.75rem 1.5rem; background: var(--primary); border: none;
-            color: white; border-radius: 0.5rem; cursor: pointer;
-            font-weight: 600; font-size: 1rem;
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1); border-color: var(--warning); color: #fbbf24;
         }
-        button:hover { background: var(--secondary); }
+        .alert-info {
+            background: rgba(37, 99, 235, 0.1); border-color: var(--primary); color: #93c5fd;
+        }
+        .alert-excess {
+            background: rgba(139, 92, 246, 0.1); border-color: #8b5cf6; color: #a78bfa;
+        }
         
         .summary-cards {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -146,10 +142,24 @@
         .summary-number { font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 0.5rem; }
         .summary-label { color: var(--text-muted); font-size: 0.875rem; text-transform: uppercase; }
         
+        .payment-log { margin-top: 2rem; }
+        .log-entry {
+            padding: 0.75rem; background: rgba(255,255,255,0.03);
+            border-left: 3px solid var(--success);
+            margin-bottom: 0.5rem; border-radius: 0 0.5rem 0.5rem 0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .log-date { font-size: 0.75rem; color: var(--text-muted); }
+        
+        .surplus-box {
+            background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 1rem; border-radius: 0.75rem; margin-top: 1rem;
+            text-align: center;
+        }
+        
         @media (max-width: 768px) {
             .grid-2 { grid-template-columns: 1fr; }
             .dashboard-grid { grid-template-columns: 1fr; }
-            .form-row { flex-direction: column; }
         }
     </style>
 </head>
@@ -162,7 +172,7 @@
             <span class="badge">Y10 • Y12 • Y16 Bars</span>
             <span class="badge">2026-2028</span>
         </div>
-        <p style="margin-top: 0.5rem; opacity: 0.9;">3-Phase Program Tracker</p>
+        <p style="margin-top: 0.5rem; opacity: 0.9;">3-Phase Program Tracker (31 Months)</p>
     </div>
 </div>
 
@@ -181,29 +191,28 @@
     <!-- DASHBOARD -->
     <div id="dashboard" class="section active">
         <h2 style="margin-bottom: 0.5rem;">Program Overview</h2>
-        <p style="color: var(--text-muted); margin-bottom: 2rem;">Master Timeline: Jan 2026 - Jul 2028 (31 months)</p>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Master Timeline: Jan 2026 - Jul 2028</p>
 
         <div class="summary-cards">
             <div class="summary-card">
-                <div class="summary-number" style="color: #60a5fa;" id="total-bars-display">361</div>
+                <div class="summary-number" style="color: #60a5fa;">361</div>
                 <div class="summary-label">Total Bars</div>
             </div>
             <div class="summary-card">
-                <div class="summary-number" style="color: #34d399;" id="total-investment-display">MK 16.7M</div>
-                <div class="summary-label">Total Investment</div>
+                <div class="summary-number" style="color: #34d399;" id="dashboard-total-raised">MK 0</div>
+                <div class="summary-label">Total Raised (All Phases)</div>
             </div>
             <div class="summary-card">
                 <div class="summary-number" style="color: #fbbf24;">6</div>
                 <div class="summary-label">Active Members</div>
             </div>
             <div class="summary-card">
-                <div class="summary-number" style="color: #f472b6;">1</div>
+                <div class="summary-number" style="color: #f472b6;" id="current-phase-display">1</div>
                 <div class="summary-label">Current Phase</div>
             </div>
         </div>
 
-        <h3 style="margin-bottom: 1.5rem; color: var(--text-muted);">Phase Progress</h3>
-        <div class="dashboard-grid" id="phase-cards-container">
+        <div id="phase-cards-container">
             <!-- Generated by JavaScript -->
         </div>
     </div>
@@ -214,11 +223,11 @@
         <div style="margin-bottom: 2rem;">
             <span class="badge status-active">ACTIVE</span>
             <span class="badge">Jan 2026</span>
-            <span class="badge">120 Bars Target</span>
+            <span class="badge">Goal: MK 520,000</span>
         </div>
 
-        <div class="alert alert-info">
-            <strong>Required by Jan 31, 2026:</strong> MK <span id="p1-needed">520,000</span> additional funding (Total phase cost: MK 3,120,000)
+        <div id="p1-status-alert">
+            <!-- Dynamic status alert -->
         </div>
 
         <div class="grid-2">
@@ -231,7 +240,7 @@
                 
                 <div class="progress-container">
                     <div class="progress-label">
-                        <span>Progress to Goal</span>
+                        <span id="p1-progress-text">Progress to MK 520,000 Goal</span>
                         <span id="p1-percent">0%</span>
                     </div>
                     <div class="progress-bar-bg">
@@ -239,15 +248,17 @@
                     </div>
                 </div>
 
+                <div id="p1-surplus-box" class="surplus-box hidden">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #a78bfa;" id="p1-surplus-amount">MK 0</div>
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">Surplus (rolls over to Phase 2)</div>
+                </div>
+
                 <div style="margin-top: 1.5rem;">
                     <table>
-                        <tr><td>Total Phase Cost</td><td class="amount">MK 3,120,000</td></tr>
-                        <tr><td>Funds Available</td><td class="amount highlight-blue">MK 2,600,000</td></tr>
-                        <tr><td>Amount to Raise</td><td class="amount highlight-yellow">MK <span id="p1-target-display">520,000</span></td></tr>
-                        <tr style="background: rgba(255,255,255,0.03);">
-                            <td style="font-weight: 600;">Remaining Needed</td>
-                            <td class="amount highlight-yellow" style="font-weight: 700; font-size: 1.1rem;" id="p1-remaining">MK 520,000</td>
-                        </tr>
+                        <tr><td>Target Goal</td><td class="amount">MK 520,000</td></tr>
+                        <tr><td>Total Raised</td><td class="amount highlight-green" id="p1-table-raised">MK 0</td></tr>
+                        <tr><td>Remaining Needed</td><td class="amount highlight-yellow" id="p1-table-remaining">MK 520,000</td></tr>
+                        <tr style="background: rgba(255,255,255,0.03);"><td>Phase Cost</td><td class="amount">MK 3,120,000</td></tr>
                     </table>
                 </div>
             </div>
@@ -255,11 +266,18 @@
             <div class="card">
                 <h3 class="card-title">Member Contributions</h3>
                 <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
-                   M'mene zinthu zikuyendela panopa.
+                    Cumulative totals. To update: Edit CONFIG section in code.
                 </p>
                 
                 <div class="member-grid" id="p1-members-list">
                     <!-- Generated by JavaScript -->
+                </div>
+
+                <div class="payment-log">
+                    <h4 style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">Recent Payments</h4>
+                    <div id="p1-payment-log">
+                        <!-- Generated from CONFIG -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -271,7 +289,11 @@
         <div style="margin-bottom: 2rem;">
             <span class="badge status-pending">Feb - Aug 2026</span>
             <span class="badge">7 Months</span>
-            <span class="badge">81 Bars Total</span>
+            <span class="badge">Monthly: MK 444,000</span>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>Note:</strong> Any surplus from Phase 1 will be deducted from the first month(s) of Phase 2.
         </div>
 
         <div class="grid-2">
@@ -280,31 +302,27 @@
                 <table>
                     <tr><td>Material</td><td><strong>Y12 Bars</strong></td></tr>
                     <tr><td>Unit Cost</td><td class="amount">MK 37,000</td></tr>
-                    <tr><td>Monthly Buying Power</td><td class="amount highlight-blue">12 bars (MK 444,000)</td></tr>
-                    <tr><td>Duration</td><td>7 months</td></tr>
+                    <tr><td>Monthly Target</td><td class="amount highlight-blue">12 bars (MK 444,000)</td></tr>
+                    <tr><td>Duration</td><td>7 months (Feb - Aug 2026)</td></tr>
                     <tr><td>Total Bars</td><td class="amount highlight-green">81 bars</td></tr>
-                    <tr><td>Total Phase Investment</td><td class="amount" style="color: var(--success);">MK 2,997,000</td></tr>
+                    <tr><td>Total Investment</td><td class="amount" style="color: var(--success);">MK 2,997,000</td></tr>
                 </table>
             </div>
 
             <div class="card">
                 <h3 class="card-title">Monthly Schedule</h3>
-                <div style="overflow-x: auto;">
-                    <table>
-                        <thead>
-                            <tr><th>Month</th><th>Bars</th><th>Cost</th><th>Balance</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Feb 2026</td><td>12</td><td class="amount">MK 444,000</td><td class="highlight-green">MK 36,000</td></tr>
-                            <tr><td>Mar 2026</td><td>12</td><td class="amount">MK 444,000</td><td class="highlight-green">MK 36,000</td></tr>
-                            <tr><td>Apr 2026</td><td>12</td><td class="amount">MK 444,000</td><td class="highlight-green">MK 36,000</td></tr>
-                            <tr><td>May 2026</td><td>12</td><td class="amount">MK 444,000</td><td class="highlight-green">MK 36,000</td></tr>
-                            <tr><td>Jun 2026</td><td>12</td><td class="amount">MK 444,000</td><td class="highlight-green">MK 36,000</td></tr>
-                            <tr><td>Jul 2026</td><td>12</td><td class="amount">MK 444,000</td><td class="highlight-green">MK 36,000</td></tr>
-                            <tr style="background: rgba(255,255,255,0.03);"><td>Aug 2026</td><td>9</td><td class="amount">MK 333,000</td><td class="highlight-yellow">MK 147,000</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <table>
+                    <thead><tr><th>Month</th><th>Bars</th><th>Cost</th><th>Balance</th></tr></thead>
+                    <tbody>
+                        <tr><td>Feb 2026</td><td>12</td><td class="amount">MK 444,000</td><td class="highlight-green">MK 36,000</td></tr>
+                        <tr><td>Mar 2026</td><td>12</td><td class="amount">MK 444,000</td><td class="highlight-green">MK 36,000</td></tr>
+                        <tr><td>Apr 2026</td><td>12</td><td class="amount">MK 444,000</td><td class="highlight-green">MK 36,000</td></tr>
+                        <tr><td>May 2026</td><td>12</td><td class="amount">MK 444,000</td><td class="highlight-green">MK 36,000</td></tr>
+                        <tr><td>Jun 2026</td><td>12</td><td class="amount">MK 444,000</td><td class="highlight-green">MK 36,000</td></tr>
+                        <tr><td>Jul 2026</td><td>12</td><td class="amount">MK 444,000</td><td class="highlight-green">MK 36,000</td></tr>
+                        <tr style="background: rgba(255,255,255,0.03);"><td>Aug 2026</td><td>9</td><td class="amount">MK 333,000</td><td class="highlight-yellow">MK 147,000</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -315,43 +333,36 @@
         <div style="margin-bottom: 2rem;">
             <span class="badge" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa;">Sep 2026 - Jul 2028</span>
             <span class="badge">23 Months</span>
-            <span class="badge">160 Bars Total</span>
         </div>
 
         <div class="grid-2">
             <div class="card">
-                <h3 class="card-title">Program Overview</h3>
+                <h3 class="card-title">Long-Term Overview</h3>
                 <table>
                     <tr><td>Material</td><td><strong>Y16 Bars</strong></td></tr>
                     <tr><td>Unit Cost</td><td class="amount">MK 66,000</td></tr>
-                    <tr><td>Monthly Target</td><td class="amount highlight-blue">7 bars (MK 462,000)</td></tr>
-                    <tr><td>Regular Period</td><td>Sep 2026 - Jun 2028 (22 months)</td></tr>
-                    <tr><td>Completion</td><td class="highlight-yellow">July 2028</td></tr>
-                    <tr style="background: rgba(255,255,255,0.03);"><td style="font-weight: 600;">Total Investment</td><td class="amount highlight-green" style="font-size: 1.2rem;">MK 10,560,000</td></tr>
+                    <tr><td>Monthly Power</td><td class="amount highlight-blue">7 bars (MK 462,000)</td></tr>
+                    <tr><td>Regular Period</td><td>Sep 2026 - Jun 2028 (22 mos)</td></tr>
+                    <tr><td>Final Month</td><td class="highlight-yellow">Jul 2028 (6 bars)</td></tr>
+                    <tr style="background: rgba(255,255,255,0.03);"><td>Total Investment</td><td class="amount highlight-green">MK 10,560,000</td></tr>
                 </table>
             </div>
 
             <div class="card">
-                <h3 class="card-title">Acquisition Breakdown</h3>
-                <div style="margin-bottom: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 0.5rem;">
-                        <span>Regular Purchases (22 months)</span>
-                        <span style="color: var(--success);">154 bars</span>
+                <h3 class="card-title">Acquisition Summary</h3>
+                <div style="padding: 1.5rem; background: rgba(255,255,255,0.03); border-radius: 0.75rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span>Regular Purchases (22 months × 7)</span>
+                        <span class="amount highlight-blue">154 bars</span>
                     </div>
-                    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-                        22 months × 7 bars = 154 bars
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span>Final Completion (Jul 2028)</span>
+                        <span class="amount highlight-yellow">6 bars</span>
                     </div>
-                    
-                    <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 0.5rem;">
-                        <span>Final Month (Jul 2028)</span>
-                        <span style="color: var(--warning);">6 bars</span>
+                    <div style="border-top: 1px solid var(--border); padding-top: 1rem; display: flex; justify-content: space-between; font-weight: 700;">
+                        <span>Total Bars</span>
+                        <span class="amount highlight-green">160 bars</span>
                     </div>
-                    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-                        Cost: MK 396,000 | Balance: MK 84,000
-                    </div>
-                </div>
-                <div class="alert alert-info">
-                    <strong>Project End:</strong> July 2028 (31 months total)
                 </div>
             </div>
         </div>
@@ -359,8 +370,8 @@
 
     <!-- MEMBERS -->
     <div id="members" class="section">
-        <h2 style="margin-bottom: 0.5rem;">Member Directory</h2>
-        <p style="color: var(--text-muted); margin-bottom: 2rem;">Contribution summary across all phases</p>
+        <h2 style="margin-bottom: 0.5rem;">Member Contributions</h2>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Cumulative totals across all phases (Jan 2026 - Jul 2028)</p>
 
         <div class="card">
             <div style="overflow-x: auto;">
@@ -368,10 +379,8 @@
                     <thead>
                         <tr>
                             <th>Member</th>
-                            <th>Phase 1 (Y10)</th>
-                            <th>Phase 2 (Y12)</th>
-                            <th>Phase 3 (Y16)</th>
-                            <th>Total Contribution</th>
+                            <th>Amount Paid</th>
+                            <th>% of Total</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -381,74 +390,83 @@
                 </table>
             </div>
         </div>
+
+        <div class="card">
+            <h3 class="card-title">Total Collections</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; text-align: center;">
+                <div>
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--success);" id="members-total-raised">MK 0</div>
+                    <div style="color: var(--text-muted); margin-top: 0.5rem;">Total Collected</div>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: 800; color: #60a5fa;" id="members-total-target">MK 520,000</div>
+                    <div style="color: var(--text-muted); margin-top: 0.5rem;">Phase 1 Target</div>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--warning);" id="members-total-remaining">MK 520,000</div>
+                    <div style="color: var(--text-muted); margin-top: 0.5rem;">Remaining</div>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>
 
 <script>
 /* ============================================
-   CONFIGURATION SECTION - EDIT THESE VALUES ONLY
-   ============================================
-   
-   INSTRUCTIONS:
-   1. Just change the numbers below
-   2. All calculations (totals, percentages, remaining) update automatically
-   3. Commit this file to GitHub and everyone sees the updates
-   
-   MEMBERS LIST: Add or remove names as needed
-*/
+   CONFIGURATION - EDIT THIS SECTION ONLY
+   ============================================ */
 
 const CONFIG = {
-    // List all members here (appears in dropdowns and tables)
+    // MEMBER LIST (6 members)
     members: ['Patrick', 'Walusungu', 'Allan', 'Sudi', 'Edmond', 'Sam'],
     
-    // PHASE 1: Y10 Bars (Jan 2026)
+    // PHASE 1 CONFIGURATION
     phase1: {
-        // How much you need to raise THIS MONTH (in addition to existing funds)
-        goalToRaise: 520000,
+        goal: 520000,           // Amount to raise in Phase 1
+        unitCost: 26000,        // Cost per Y10 bar
+        totalBars: 120,         // Total bars to buy
         
-        // Funds already available in treasury
-        fundsAvailable: 2600000,
-        
-        // Cost per bar
-        unitCost: 26000,
-        
-        // Total bars to buy this phase
-        totalBars: 120,
-        
-        // Individual contributions (who paid what)
+        /* 
+           CONTRIBUTIONS - KEEP ADDING TO THESE NUMBERS
+           When someone pays, add the amount to their current total
+           Example: If Sudi pays 80,000 then later 80,000 again:
+           Change: Sudi: 80000 → Sudi: 160000
+        */
         contributions: {
-            Patrick: 100000,
-            Walusungu: 100000,
-            Allan: 0,      // <-- EDIT: Change to amount paid
-            Sudi: 0,       // <-- EDIT: Change to amount paid  
-            Edmond: 0,     // <-- EDIT: Change to amount paid
-            Sam: 100000         // <-- EDIT: Change to amount paid
-        }
+            Patrick: 100000,     // Cumulative amount paid
+            Walusungu: 100000,   // Cumulative amount paid  
+            Allan: 0,            // EDIT: Add amounts here as they pay
+            Sudi: 0,             // EDIT: Example: Change to 160000 after two payments of 80k
+            Edmond: 0,           // EDIT: Add amounts here
+            Sam: 100000               // EDIT: Add amounts here
+        },
+        
+        // PAYMENT LOG - Track individual transactions (optional, for display)
+        paymentLog: [
+            { member: 'Patrick', amount: 100000, date: 'Jan 2026', note: 'Initial payment' },
+            { member: 'Walusungu', amount: 100000, date: 'Jan 2026', note: 'Initial payment' }
+            // Add new entries below as payments come in:
+            // { member: 'Sudi', amount: 80000, date: 'Jan 2026', note: 'First installment' },
+            // { member: 'Allan', amount: 80000, date: 'Jan 2026', note: '' },
+        ]
     },
     
-    // PHASE 2: Y12 Bars (Feb-Aug 2026) - Data for reference
+    // PHASE 2 & 3 CONSTANTS
     phase2: {
-        unitCost: 37000,
-        monthlyPower: 444000,
+        monthlyTarget: 444000,
         totalBars: 81,
-        duration: '7 months'
+        months: 7
     },
-    
-    // PHASE 3: Y16 Bars (Sep 2026-Jul 2028) - Data for reference  
     phase3: {
-        unitCost: 66000,
-        monthlyPower: 462000,
+        monthlyTarget: 462000,
         totalBars: 160,
-        duration: '23 months',
-        regularBars: 154,
-        finalBars: 6
+        months: 23
     }
 };
 
 /* ============================================
-   DO NOT EDIT BELOW THIS LINE
-   Everything below calculates automatically from CONFIG above
+   DO NOT EDIT BELOW - AUTO CALCULATIONS
    ============================================ */
 
 function formatMoney(amount) {
@@ -456,23 +474,26 @@ function formatMoney(amount) {
 }
 
 function calculatePhase1() {
-    const p1 = CONFIG.phase1;
     let totalRaised = 0;
+    const contributions = CONFIG.phase1.contributions;
     
-    // Calculate total raised from individual contributions
     for (let member of CONFIG.members) {
-        totalRaised += (p1.contributions[member] || 0);
+        totalRaised += (contributions[member] || 0);
     }
     
-    const remaining = p1.goalToRaise - totalRaised;
-    const percent = Math.min(100, Math.max(0, (totalRaised / p1.goalToRaise) * 100));
+    const goal = CONFIG.phase1.goal;
+    const remaining = goal - totalRaised;
+    const percent = Math.min(100, Math.max(0, (totalRaised / goal) * 100));
+    const surplus = totalRaised > goal ? totalRaised - goal : 0;
+    const isComplete = totalRaised >= goal;
     
     return {
         raised: totalRaised,
-        remaining: remaining,
+        remaining: remaining > 0 ? remaining : 0,
+        surplus: surplus,
         percent: percent.toFixed(1),
-        totalCost: p1.totalBars * p1.unitCost,
-        isComplete: remaining <= 0
+        isComplete: isComplete,
+        isExcess: surplus > 0
     };
 }
 
@@ -480,61 +501,68 @@ function initDashboard() {
     const calc = calculatePhase1();
     const p1 = CONFIG.phase1;
     
-    // Update dashboard overview
-    document.getElementById('total-bars-display').textContent = 
-        p1.totalBars + CONFIG.phase2.totalBars + CONFIG.phase3.totalBars;
+    // Update total raised
+    document.getElementById('dashboard-total-raised').textContent = formatMoney(calc.raised);
     
-    const totalInvestment = (p1.totalBars * p1.unitCost) + 
-                           (CONFIG.phase2.totalBars * CONFIG.phase2.unitCost) + 
-                           (CONFIG.phase3.totalBars * CONFIG.phase3.unitCost);
-    document.getElementById('total-investment-display').textContent = 
-        'MK ' + (totalInvestment / 1000000).toFixed(1) + 'M';
+    // Determine current phase
+    let currentPhase = 1;
+    let phaseStatus = 'Active';
+    let statusClass = 'status-active';
     
-    // Generate phase cards
-    const cardsHtml = `
-        <div class="phase-card active-phase" onclick="showSection('phase1')">
+    if (calc.isComplete) {
+        currentPhase = 2; // Move to phase 2
+        phaseStatus = 'Phase 1 Complete';
+        statusClass = 'status-completed';
+    }
+    
+    document.getElementById('current-phase-display').textContent = currentPhase;
+    
+    // Cards HTML
+    let cardsHtml = `
+        <div class="phase-card ${calc.isComplete ? '' : 'active-phase'}" onclick="showSection('phase1')">
             <div class="phase-header">
                 <div>
                     <div class="phase-title">Phase 1: Y10 Bars</div>
-                    <div class="phase-subtitle">Jan 2026 • ${p1.totalBars} Bars Target</div>
+                    <div class="phase-subtitle">Jan 2026 • ${p1.totalBars} Bars</div>
                 </div>
-                <span class="phase-status ${calc.isComplete ? 'status-completed' : 'status-active'}">
-                    ${calc.isComplete ? 'Complete' : 'Active'}
+                <span class="phase-status ${calc.isExcess ? 'status-surplus' : (calc.isComplete ? 'status-completed' : 'status-active')}">
+                    ${calc.isExcess ? 'EXCESS' : (calc.isComplete ? 'COMPLETE' : 'ACTIVE')}
                 </span>
             </div>
             <div class="progress-container">
                 <div class="progress-label">
-                    <span>Raised: ${formatMoney(calc.raised)}</span>
-                    <span>Goal: ${formatMoney(p1.goalToRaise)}</span>
+                    <span>${calc.isExcess ? 'Excess Funds:' : 'Progress:'} ${formatMoney(calc.raised)}</span>
+                    <span>${calc.percent}%</span>
                 </div>
                 <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" style="width: ${calc.percent}%"></div>
+                    <div class="progress-bar-fill ${calc.isExcess ? 'excess' : ''}" style="width: ${calc.percent}%"></div>
                 </div>
             </div>
-            <div style="margin-top: 1rem; font-size: 0.9rem; color: ${calc.remaining > 0 ? 'var(--warning)' : 'var(--success)'}; font-weight: 600;">
-                ${calc.remaining > 0 ? formatMoney(calc.remaining) + ' remaining' : 'GOAL REACHED!'}
+            <div style="margin-top: 1rem; font-size: 0.9rem; 
+                        color: ${calc.isExcess ? '#a78bfa' : (calc.isComplete ? 'var(--success)' : 'var(--warning)')}; 
+                        font-weight: 600;">
+                ${calc.isExcess ? `SURPLUS: ${formatMoney(calc.surplus)} for Phase 2` : 
+                  (calc.isComplete ? 'GOAL REACHED! Funds secured.' : `${formatMoney(calc.remaining)} remaining`)}
             </div>
         </div>
 
-        <div class="phase-card" onclick="showSection('phase2')">
+        <div class="phase-card ${calc.isComplete ? 'active-phase' : ''}" onclick="showSection('phase2')">
             <div class="phase-header">
                 <div>
                     <div class="phase-title">Phase 2: Y12 Bars</div>
-                    <div class="phase-subtitle">Feb-Aug 2026 • ${CONFIG.phase2.duration}</div>
+                    <div class="phase-subtitle">Feb-Aug 2026 • 7 Months</div>
                 </div>
-                <span class="phase-status status-pending">Upcoming</span>
+                <span class="phase-status ${calc.isComplete ? 'status-active' : 'status-pending'}">
+                    ${calc.isComplete ? 'READY' : 'UPCOMING'}
+                </span>
             </div>
-            <div class="progress-container">
-                <div class="progress-label">
-                    <span>Monthly Target</span>
-                    <span>${formatMoney(CONFIG.phase2.monthlyPower)}</span>
-                </div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" style="width: 0%; background: linear-gradient(90deg, #f59e0b, #fbbf24);"></div>
-                </div>
+            <div style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+                ${calc.isComplete ? 
+                    `<span style="color: var(--success);">● Phase 1 funded. Ready to start Feb 2026.</span>` : 
+                    'Waiting for Phase 1 completion'}
             </div>
-            <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">
-                ${CONFIG.phase2.totalBars} bars total • MK ${CONFIG.phase2.unitCost}/unit
+            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                Monthly: ${formatMoney(CONFIG.phase2.monthlyTarget)} • 81 bars total
             </div>
         </div>
 
@@ -542,21 +570,15 @@ function initDashboard() {
             <div class="phase-header">
                 <div>
                     <div class="phase-title">Phase 3: Y16 Bars</div>
-                    <div class="phase-subtitle">Sep 2026 - Jul 2028 • ${CONFIG.phase3.duration}</div>
+                    <div class="phase-subtitle">Sep 2026 - Jul 2028</div>
                 </div>
-                <span class="phase-status status-pending">Future</span>
+                <span class="phase-status status-pending">FUTURE</span>
             </div>
-            <div class="progress-container">
-                <div class="progress-label">
-                    <span>Timeline</span>
-                    <span>Preparation</span>
-                </div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" style="width: 0%; background: linear-gradient(90deg, #8b5cf6, #a78bfa);"></div>
-                </div>
+            <div style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+                23 months • 160 bars • Ends July 2028
             </div>
-            <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">
-                ${CONFIG.phase3.totalBars} bars • Ends July 2028
+            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                Long-term accumulation phase
             </div>
         </div>
     `;
@@ -568,105 +590,68 @@ function initPhase1() {
     const calc = calculatePhase1();
     const p1 = CONFIG.phase1;
     
-    // Update all Phase 1 displays
+    // Status alert
+    const alertBox = document.getElementById('p1-status-alert');
+    if (calc.isExcess) {
+        alertBox.className = 'alert alert-excess';
+        alertBox.innerHTML = `<strong>PHASE 1 EXCEEDS TARGET!</strong> We have raised ${formatMoney(calc.raised)}. 
+        MK ${calc.surplus.toLocaleString()} will roll over as credit for Phase 2.`;
+    } else if (calc.isComplete) {
+        alertBox.className = 'alert alert-success';
+        alertBox.innerHTML = `<strong>GOAL REACHED!</strong> Phase 1 fully funded. Ready to purchase 120 Y10 bars.`;
+    } else {
+        alertBox.className = 'alert alert-warning';
+        alertBox.innerHTML = `<strong>IN PROGRESS:</strong> We need ${formatMoney(calc.remaining)} more by Jan 31, 2026.`;
+    }
+    
+    // Update numbers
     document.getElementById('p1-total-raised').textContent = formatMoney(calc.raised);
     document.getElementById('p1-percent').textContent = calc.percent + '%';
     document.getElementById('p1-bar').style.width = calc.percent + '%';
-    document.getElementById('p1-remaining').textContent = formatMoney(calc.remaining > 0 ? calc.remaining : 0);
-    document.getElementById('p1-target-display').textContent = formatMoney(p1.goalToRaise);
-    document.getElementById('p1-needed').textContent = formatMoney(p1.goalToRaise);
+    document.getElementById('p1-table-raised').textContent = formatMoney(calc.raised);
+    document.getElementById('p1-table-remaining').textContent = formatMoney(calc.remaining);
     
-    // Generate member list
+    // Surplus box
+    const surplusBox = document.getElementById('p1-surplus-box');
+    if (calc.surplus > 0) {
+        surplusBox.classList.remove('hidden');
+        document.getElementById('p1-surplus-amount').textContent = formatMoney(calc.surplus);
+        document.getElementById('p1-progress-text').textContent = 'Goal Exceeded!';
+    } else {
+        surplusBox.classList.add('hidden');
+        document.getElementById('p1-progress-text').textContent = 'Progress to MK 520,000 Goal';
+    }
+    
+    // Members list
     let membersHtml = '';
     CONFIG.members.forEach(member => {
         const amount = p1.contributions[member] || 0;
-        const isPaid = amount > 0;
-        const remaining = isPaid ? 0 : p1.goalToRaise / CONFIG.members.length; // Rough estimate per person
+        const percent = (amount / p1.goal * 100).toFixed(1);
         
         membersHtml += `
             <div class="member-item">
                 <div>
                     <div style="font-weight: 600; font-size: 1.1rem;">${member}</div>
-                    <div style="font-size: 0.875rem; color: ${isPaid ? 'var(--success)' : 'var(--text-muted)'};">
-                        ${isPaid ? 'Paid ' + formatMoney(amount) : 'Pending contribution'}
+                    <div style="font-size: 0.875rem; color: ${amount > 0 ? 'var(--success)' : 'var(--text-muted)'};">
+                        ${amount > 0 ? formatMoney(amount) + ' (' + percent + '% of goal)' : 'No contribution yet'}
                     </div>
                 </div>
-                <span class="badge-small ${isPaid ? 'status-active' : 'status-pending'}" style="font-size: 0.9rem;">
-                    ${isPaid ? 'Paid' : 'Pending'}
+                <span class="badge-small ${amount > 0 ? 'status-active' : 'status-pending'}">
+                    ${amount > 0 ? 'Paid' : 'Pending'}
                 </span>
             </div>
         `;
     });
     document.getElementById('p1-members-list').innerHTML = membersHtml;
-}
-
-function initMembers() {
-    const p1 = CONFIG.phase1;
-    let tbody = '';
-    let grandTotal = 0;
     
-    CONFIG.members.forEach(member => {
-        const p1Amount = p1.contributions[member] || 0;
-        grandTotal += p1Amount;
-        
-        tbody += `
-            <tr>
-                <td><strong>${member}</strong></td>
-                <td class="amount ${p1Amount > 0 ? 'highlight-green' : ''}">
-                    ${p1Amount > 0 ? formatMoney(p1Amount) : '-'}
-                </td>
-                <td class="amount" style="color: var(--text-muted);">-</td>
-                <td class="amount" style="color: var(--text-muted);">-</td>
-                <td class="amount highlight-blue">${p1Amount > 0 ? formatMoney(p1Amount) : '-'}</td>
-                <td>
-                    <span class="badge-small ${p1Amount > 0 ? 'status-active' : 'status-pending'}">
-                        ${p1Amount > 0 ? 'Active' : 'Pending'}
-                    </span>
-                </td>
-            </tr>
-        `;
-    });
-    
-    // Add total row
-    tbody += `
-        <tr style="background: rgba(255,255,255,0.05); font-weight: 700;">
-            <td>TOTAL</td>
-            <td class="amount highlight-green">${formatMoney(grandTotal)}</td>
-            <td>-</td>
-            <td>-</td>
-            <td class="amount highlight-green">${formatMoney(grandTotal)}</td>
-            <td></td>
-        </tr>
-    `;
-    
-    document.getElementById('members-table-body').innerHTML = tbody;
-}
-
-function showSection(sectionId) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(sectionId).classList.add('active');
-    
-    // Update nav buttons
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if(btn.textContent.toLowerCase().includes(sectionId)) {
-            btn.classList.add('active');
-        }
-    });
-    
-    // Re-init sections to ensure data is fresh
-    if(sectionId === 'dashboard') initDashboard();
-    if(sectionId === 'phase1') initPhase1();
-    if(sectionId === 'members') initMembers();
-}
-
-// Initialize everything on load
-document.addEventListener('DOMContentLoaded', () => {
-    initDashboard();
-    initPhase1();
-    initMembers();
-});
-</script>
-
-</body>
-</html>
+    // Payment log
+    const logContainer = document.getElementById('p1-payment-log');
+    if (p1.paymentLog && p1.paymentLog.length > 0) {
+        let logHtml = '';
+        // Sort by most recent first
+        [...p1.paymentLog].reverse().forEach(entry => {
+            logHtml += `
+                <div class="log-entry">
+                    <div>
+                        <strong>${entry.member}</strong> paid ${formatMoney(entry.amount)}
+                        ${entry.note ? `<span style="color: var(--text-muted); font-size: 0.
