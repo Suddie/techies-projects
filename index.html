@@ -159,7 +159,7 @@
     <div class="header-content">
         <h1>TECHIES INVESTMENTS</h1>
         <div>
-            <span class="badge">Y10 • Y12 • Y16 Bars</span>
+            <span class="badge">Y10 â€¢ Y12 â€¢ Y16 Bars</span>
             <span class="badge">2026-2028</span>
         </div>
         <p style="margin-top: 0.5rem; opacity: 0.9;">3-Phase Program Tracker</p>
@@ -339,7 +339,7 @@
                         <span style="color: var(--success);">154 bars</span>
                     </div>
                     <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-                        22 months × 7 bars = 154 bars
+                        22 months Ã— 7 bars = 154 bars
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 0.5rem;">
@@ -423,7 +423,7 @@ const CONFIG = {
             Allan: 0,      // <-- EDIT: Change to amount paid
             Sudi: 0,       // <-- EDIT: Change to amount paid  
             Edmond: 0,     // <-- EDIT: Change to amount paid
-            Sam: 0         // <-- EDIT: Change to amount paid
+            Sam: 100000         // <-- EDIT: Change to amount paid
         }
     },
     
@@ -496,7 +496,7 @@ function initDashboard() {
             <div class="phase-header">
                 <div>
                     <div class="phase-title">Phase 1: Y10 Bars</div>
-                    <div class="phase-subtitle">Jan 2026 • ${p1.totalBars} Bars Target</div>
+                    <div class="phase-subtitle">Jan 2026 â€¢ ${p1.totalBars} Bars Target</div>
                 </div>
                 <span class="phase-status ${calc.isComplete ? 'status-completed' : 'status-active'}">
                     ${calc.isComplete ? 'Complete' : 'Active'}
@@ -520,7 +520,7 @@ function initDashboard() {
             <div class="phase-header">
                 <div>
                     <div class="phase-title">Phase 2: Y12 Bars</div>
-                    <div class="phase-subtitle">Feb-Aug 2026 • ${CONFIG.phase2.duration}</div>
+                    <div class="phase-subtitle">Feb-Aug 2026 â€¢ ${CONFIG.phase2.duration}</div>
                 </div>
                 <span class="phase-status status-pending">Upcoming</span>
             </div>
@@ -534,7 +534,7 @@ function initDashboard() {
                 </div>
             </div>
             <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">
-                ${CONFIG.phase2.totalBars} bars total • MK ${CONFIG.phase2.unitCost}/unit
+                ${CONFIG.phase2.totalBars} bars total â€¢ MK ${CONFIG.phase2.unitCost}/unit
             </div>
         </div>
 
@@ -542,7 +542,7 @@ function initDashboard() {
             <div class="phase-header">
                 <div>
                     <div class="phase-title">Phase 3: Y16 Bars</div>
-                    <div class="phase-subtitle">Sep 2026 - Jul 2028 • ${CONFIG.phase3.duration}</div>
+                    <div class="phase-subtitle">Sep 2026 - Jul 2028 â€¢ ${CONFIG.phase3.duration}</div>
                 </div>
                 <span class="phase-status status-pending">Future</span>
             </div>
@@ -556,7 +556,7 @@ function initDashboard() {
                 </div>
             </div>
             <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">
-                ${CONFIG.phase3.totalBars} bars • Ends July 2028
+                ${CONFIG.phase3.totalBars} bars â€¢ Ends July 2028
             </div>
         </div>
     `;
