@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Techies Investments - Multi-Phase Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #2563eb; --secondary: #1d4ed8; --success: #10b981;
+            --warning: #f59e0b; --danger: #ef4444; --dark: #0f172a;
+            --card: #1e293b; --text: #e2e8f0; --text-muted: #94a3b8;
+            --border: #334155; --phase2: #f59e0b; --phase3: #8b5cf6;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--dark); color: var(--text); line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+        .header-content { max-width: 1200px; margin: 0 auto; }
+        .badge {
+            display: inline-block; padding: 0.25rem 0.75rem;
+            background: rgba(255,255,255,0.2); border-radius: 9999px;
+            font-size: 0.875rem; font-weight: 600; margin-right: 0.5rem;
+        }
+        .nav {
+            background: var(--card); border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 90; overflow-x: auto;
+        }
+        .nav-content {
+            max-width: 1200px; margin: 0 auto; display: flex; gap: 0.5rem; padding: 0.5rem;
+        }
+        .nav-btn {
+            padding: 0.75rem 1.5rem; background: transparent; border: none;
+            color: var(--text-muted); cursor: pointer; font-weight: 600;
+            border-radius: 0.5rem; white-space: nowrap; font-size: 1rem;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+        .nav-btn.active { background: var(--primary); color: white; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .dashboard-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem; margin-bottom: 2rem;
+        }
+        .phase-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 1rem; padding: 1.5rem; cursor: pointer;
+            transition: all 0.3s; position: relative;
+        }
+        .phase-card:hover { transform: translateY(-2px); border-color: var(--primary); }
+        .phase-card.active-phase { border-color: var(--success); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3); }
+        .phase-card.phase2-active { border-color: var(--phase2); box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3); }
+        .phase-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; }
+        .phase-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .phase-subtitle { color: var(--text-muted); font-size: 0.875rem; }
+        .phase-status {
+            padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem;
+            font-weight: 700; text-transform: uppercase;
+        }
+        .status-active { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .status-active-p2 { background: rgba(245, 158, 11, 0.2); color: var(--phase2); }
+        .status-pending { background: rgba(148, 163, 184, 0.2); color: var(--text-muted); }
+        .status-completed { background: rgba(16, 185, 129, 0.3); color: #6ee7b7; }
+        
+        .progress-container { margin: 1.5rem 0; }
+        .progress-label { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted); }
+        .progress-bar-bg {
+            height: 12px; background: rgba(255,255,255,0.1);
+            border-radius: 9999px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; border-radius: 9999px; transition: width 0.5s ease;
+        }
+        .fill-p1 { background: linear-gradient(90deg, var(--success), #34d399); }
+        .fill-p2 { background: linear-gradient(90deg, var(--phase2), #fbbf24); }
+        .fill-p3 { background: linear-gradient(90deg, var(--phase3), #a78bfa); }
+        
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 1rem; padding: 2rem; margin-bottom: 1.5rem;
+        }
+        .card-title { font-size: 1.25rem; margin-bottom: 1.5rem; color: var(--text); display: flex; justify-content: space-between; align-items: center; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th {
+            background: rgba(255,255,255,0.05); padding: 1rem; text-align: left;
+            font-weight: 600; color: var(--text-muted); text-transform: uppercase;
+            font-size: 0.75rem; letter-spacing: 0.05em; border-bottom: 1px solid var(--border);
+        }
+        td { padding: 1rem; border-bottom: 1px solid var(--border); color: var(--text); }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        .amount { font-family: 'Courier New', monospace; font-weight: 600; }
+        .highlight-green { color: var(--success); }
+        .highlight-yellow { color: var(--warning); }
+        .highlight-orange { color: var(--phase2); }
+        .highlight-purple { color: var(--phase3); }
+        
+        .member-grid { display: grid; gap: 1rem; }
+        .member-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem; background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border); border-radius: 0.75rem;
+        }
+        .badge-small {
+            padding: 0.25rem 0.75rem; border-radius: 9999px;
+            font-size: 0.75rem; font-weight: 600;
+        }
+        .alert {
+            padding: 1.2rem; border-radius: 0.75rem; margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+        .alert-success { background: rgba(16, 185, 129, 0.1); border-color: var(--success); color: #6ee7b7; }
+        .alert-warning { background: rgba(245, 158, 11, 0.1); border-color: var(--warning); color: #fbbf24; }
+        .alert-info { background: rgba(37, 99, 235, 0.1); border-color: var(--primary); color: #93c5fd; }
+        .alert-phase2 { background: rgba(245, 158, 11, 0.1); border-color: var(--phase2); color: #fbbf24; }
+        
+        .summary-cards {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem; margin-bottom: 2rem;
+        }
+        .summary-card {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(29, 78, 216, 0.2));
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            padding: 1.5rem; border-radius: 1rem; text-align: center;
+        }
+        .summary-number { font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 0.5rem; }
+        .summary-label { color: var(--text-muted); font-size: 0.875rem; text-transform: uppercase; }
+        
+        .payment-log { margin-top: 2rem; }
+        .log-entry {
+            padding: 0.75rem; background: rgba(255,255,255,0.03);
+            border-left: 3px solid var(--success);
+            margin-bottom: 0.5rem; border-radius: 0 0.5rem 0.5rem 0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .log-entry.p2 { border-left-color: var(--phase2); }
+        .log-date { font-size: 0.75rem; color: var(--text-muted); }
+        
+        .month-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem; margin-top: 1rem;
+        }
+        .month-box {
+            padding: 1rem; background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border); border-radius: 0.5rem; text-align: center;
+        }
+        .month-box.completed { border-color: var(--success); background: rgba(16, 185, 129, 0.1); }
+        .month-box.active { border-color: var(--phase2); background: rgba(245, 158, 11, 0.1); }
+        .month-name { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .month-amount { font-weight: 700; color: var(--text); }
+        
+        .phase-indicator {
+            display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 0.5rem;
+        }
+        .indicator-p1 { background: var(--success); }
+        .indicator-p2 { background: var(--phase2); }
+        .indicator-p3 { background: var(--phase3); }
+        
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="header">
+    <div class="header-content">
+        <h1>TECHIES INVESTMENTS</h1>
+        <div>
+            <span class="badge">Y10 • Y12 • Y16 Bars</span>
+            <span class="badge">2026-2028</span>
+        </div>
+        <p style="margin-top: 0.5rem; opacity: 0.9;">Multi-Phase Contribution Tracker</p>
+    </div>
+</div>
+
+<nav class="nav">
+    <div class="nav-content">
+        <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
+        <button class="nav-btn" onclick="showSection('phase1')">Phase 1 (Y10)</button>
+        <button class="nav-btn" onclick="showSection('phase2')">Phase 2 (Y12)</button>
+        <button class="nav-btn" onclick="showSection('phase3')">Phase 3 (Y16)</button>
+        <button class="nav-btn" onclick="showSection('members')">All Members</button>
+    </div>
+</nav>
+
+<div class="container">
+    
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="section active">
+        <h2 style="margin-bottom: 0.5rem;">Program Overview</h2>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Real-time progress across all 3 phases</p>
+
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="summary-number" style="color: #60a5fa;">361</div>
+                <div class="summary-label">Total Bars</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-number" style="color: var(--success);" id="dash-total-raised">MK 0</div>
+                <div class="summary-label">Total Raised (All Phases)</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-number" style="color: var(--phase2);" id="dash-current-phase">2</div>
+                <div class="summary-label">Current Phase</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-number" style="color: #f472b6;" id="dash-active-members">6</div>
+                <div class="summary-label">Active Members</div>
+            </div>
+        </div>
+
+        <div id="phase-cards-container"></div>
+        
+        <div class="card" style="margin-top: 2rem;">
+            <h3 class="card-title">Member Standing (All Phases)</h3>
+            <div style="overflow-x: auto;">
+                <table id="dashboard-members-table">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Phase 1 (Y10)</th>
+                            <th>Phase 2 (Y12)</th>
+                            <th>Phase 3 (Y16)</th>
+                            <th>Total Contribution</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHASE 1 -->
+    <div id="phase1" class="section">
+        <h2 style="margin-bottom: 0.5rem;">Phase 1: Y10 Bars</h2>
+        <div style="margin-bottom: 2rem;">
+            <span class="badge status-completed">COMPLETED</span>
+            <span class="badge">Jan 2026</span>
+            <span class="badge">120 Bars</span>
+        </div>
+
+        <div class="alert alert-success">
+            <strong>PHASE 1 COMPLETE!</strong> All members paid. MK <span id="p1-total-collected">0</span> collected (exceeded MK 520,000 target).
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">Final Contributions</h3>
+            <div id="p1-final-standings"></div>
+            
+            <div class="payment-log" style="margin-top: 2rem;">
+                <h4 style="margin-bottom: 1rem; color: var(--text-muted);">Payment History</h4>
+                <div id="p1-payment-history"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div id="phase2" class="section">
+        <h2 style="margin-bottom: 0.5rem;">Phase 2: Y12 Bars Program</h2>
+        <div style="margin-bottom: 2rem;">
+            <span class="badge status-active-p2">ACTIVE NOW</span>
+            <span class="badge">Feb - Aug 2026</span>
+            <span class="badge">7 Months</span>
+        </div>
+
+        <div class="alert alert-phase2">
+            <strong>PHASE 2 IN PROGRESS!</strong> Monthly target: MK 444,000 (12 bars). Track individual member contributions below.
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3 class="card-title">Program Overview</h3>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Overall Phase 2 Progress</span>
+                        <span id="p2-overall-percent">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill fill-p2" id="p2-overall-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <table style="margin-top: 1.5rem;">
+                    <tr><td>Monthly Target</td><td class="amount highlight-orange">MK 444,000</td></tr>
+                    <tr><td>Duration</td><td>7 months (Feb - Aug 2026)</td></tr>
+                    <tr><td>Total Bars</td><td class="amount">81 bars</td></tr>
+                    <tr><td>Total Phase Cost</td><td class="amount">MK 2,997,000</td></tr>
+                    <tr style="background: rgba(255,255,255,0.03);">
+                        <td>Collected So Far</td>
+                        <td class="amount highlight-orange" id="p2-total-collected">MK 0</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">Monthly Schedule</h3>
+                <div class="month-grid" id="p2-month-grid"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">Member Contributions (Phase 2)</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                Cumulative totals for Phase 2. Edit CONFIG in code to update.
+            </p>
+            <div id="p2-member-standings"></div>
+            
+            <div class="payment-log" style="margin-top: 2rem;">
+                <h4 style="margin-bottom: 1rem; color: var(--text-muted);">Recent Payments (Phase 2)</h4>
+                <div id="p2-payment-history"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div id="phase3" class="section">
+        <h2 style="margin-bottom: 0.5rem;">Phase 3: Y16 Bars Program</h2>
+        <div style="margin-bottom: 2rem;">
+            <span class="badge status-pending">FUTURE</span>
+            <span class="badge">Sep 2026 - Jul 2028</span>
+            <span class="badge">23 Months</span>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>Coming Soon:</strong> Phase 3 begins September 2026. Members will continue contributing monthly.
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3 class="card-title">Program Structure</h3>
+                <table>
+                    <tr><td>Material</td><td><strong>Y16 Bars</strong></td></tr>
+                    <tr><td>Unit Cost</td><td class="amount">MK 66,000</td></tr>
+                    <tr><td>Monthly Target</td><td class="amount highlight-purple">7 bars (MK 462,000)</td></tr>
+                    <tr><td>Duration</td><td>23 months</td></tr>
+                    <tr><td>Total Bars</td><td class="amount">160 bars</td></tr>
+                    <tr><td>Project End</td><td class="highlight-purple">July 2028</td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">Member Preparations</h3>
+                <div id="p3-member-status"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div id="members" class="section">
+        <h2 style="margin-bottom: 0.5rem;">Complete Member Directory</h2>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Lifetime contributions across all phases (Jan 2026 - Jul 2028)</p>
+
+        <div class="card">
+            <h3 class="card-title">Contribution Summary by Member</h3>
+            <div style="overflow-x: auto;">
+                <table id="full-members-table">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th><span class="phase-indicator indicator-p1"></span>Phase 1 (Y10)</th>
+                            <th><span class="phase-indicator indicator-p2"></span>Phase 2 (Y12)</th>
+                            <th><span class="phase-indicator indicator-p3"></span>Phase 3 (Y16)</th>
+                            <th>Total</th>
+                            <th>% of Total</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <h3 class="card-title">Program Totals</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; text-align: center;">
+                <div>
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--success);" id="lifetime-total">MK 0</div>
+                    <div style="color: var(--text-muted); margin-top: 0.5rem;">Lifetime Contributions</div>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--phase2);" id="current-month-total">MK 0</div>
+                    <div style="color: var(--text-muted); margin-top: 0.5rem;">Current Month (Feb)</div>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: 800; color: #60a5fa;" id="project-completion">0%</div>
+                    <div style="color: var(--text-muted); margin-top: 0.5rem;">Project Completion</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* ============================================
+   CONFIGURATION - EDIT THIS SECTION ONLY
+   ============================================ */
+
+const CONFIG = {
+    members: ['Patrick', 'Walusungu', 'Allan', 'Sudi', 'Edmond', 'Sam'],
+    
+    // PHASE 1: Y10 Bars (COMPLETED - Jan 2026)
+    phase1: {
+        goal: 520000,
+        status: 'completed', // completed, active, pending
+        contributions: {
+            Patrick: 100000,
+            Walusungu: 100000,
+            Allan: 80000,      // EDIT: Update as needed
+            Sudi: 80000,       // EDIT: Update as needed
+            Edmond: 100000,     // EDIT: Update as needed
+            Sam: 100000         // EDIT: Update as needed
+        },
+        paymentLog: [
+            { member: 'Patrick', amount: 100000, date: 'Jan 2026', phase: 1 },
+            { member: 'Walusungu', amount: 100000, date: 'Jan 2026', phase: 1 },
+            { member: 'Allan', amount: 80000, date: 'Jan 2026', phase: 1 },
+            { member: 'Sudi', amount: 80000, date: 'Jan 2026', phase: 1 },
+            { member: 'Edmond', amount: 100000, date: 'Jan 2026', phase: 1 },
+            { member: 'Sam', amount: 100000, date: 'Jan 2026', phase: 1 }
+        ]
+    },
+    
+    // PHASE 2: Y12 Bars (ACTIVE - Feb-Aug 2026)
+    phase2: {
+        monthlyTarget: 444000,
+        totalMonths: 7,
+        months: ['Feb 2026', 'Mar 2026', 'Apr 2026', 'May 2026', 'Jun 2026', 'Jul 2026', 'Aug 2026'],
+        status: 'active',
+        
+        // Cumulative contributions for Phase 2 (keep adding to these)
+        contributions: {
+            Patrick: 0,        // EDIT: Add Feb payment, then Mar, etc.
+            Walusungu: 0,      // EDIT: Update monthly
+            Allan: 0,          // EDIT: Update monthly
+            Sudi: 0,           // EDIT: Update monthly
+            Edmond: 0,         // EDIT: Update monthly
+            Sam: 0             // EDIT: Update monthly
+        },
+        
+        // Payment log for Phase 2 (add each monthly payment)
+        paymentLog: [
+            // Example: { member: 'Patrick', amount: 74000, date: 'Feb 2026', month: 'Feb 2026', note: 'Monthly' }
+        ]
+    },
+    
+    // PHASE 3: Y16 Bars (FUTURE - Sep 2026-Jul 2028)
+    phase3: {
+        monthlyTarget: 462000,
+        totalMonths: 23,
+        status: 'pending',
+        contributions: {
+            Patrick: 0, Walusungu: 0, Allan: 0, Sudi: 0, Edmond: 0, Sam: 0
+        },
+        paymentLog: []
+    }
+};
+
+/* ============================================
+   AUTO-CALCULATIONS - DO NOT EDIT BELOW
+   ============================================ */
+
+function formatMoney(amount) {
+    return 'MK ' + amount.toLocaleString();
+}
+
+function getMemberTotal(member) {
+    const p1 = CONFIG.phase1.contributions[member] || 0;
+    const p2 = CONFIG.phase2.contributions[member] || 0;
+    const p3 = CONFIG.phase3.contributions[member] || 0;
+    return { p1, p2, p3, total: p1 + p2 + p3 };
+}
+
+function getPhaseTotal(phaseNum) {
+    const phase = CONFIG['phase' + phaseNum];
+    let total = 0;
+    CONFIG.members.forEach(m => total += (phase.contributions[m] || 0));
+    return total;
+}
+
+function initDashboard() {
+    // Update summary cards
+    const p1Total = getPhaseTotal(1);
+    const p2Total = getPhaseTotal(2);
+    const p3Total = getPhaseTotal(3);
+    const grandTotal = p1Total + p2Total + p3Total;
+    
+    document.getElementById('dash-total-raised').textContent = formatMoney(grandTotal);
+    
+    // Determine current phase
+    let currentPhase = 1;
+    if (CONFIG.phase1.status === 'completed') currentPhase = 2;
+    if (CONFIG.phase2.status === 'completed') currentPhase = 3;
+    document.getElementById('dash-current-phase').textContent = currentPhase;
+    
+    // Phase cards
+    const p1Complete = p1Total >= CONFIG.phase1.goal;
+    const p2Active = currentPhase === 2;
+    
+    let cardsHtml = `
+        <div class="phase-card ${p1Complete ? '' : 'active-phase'}" onclick="showSection('phase1')">
+            <div class="phase-header">
+                <div>
+                    <div class="phase-title">Phase 1: Y10 Bars</div>
+                    <div class="phase-subtitle">Jan 2026 • 120 Bars</div>
+                </div>
+                <span class="phase-status ${p1Complete ? 'status-completed' : 'status-active'}">
+                    ${p1Complete ? 'COMPLETED' : 'ACTIVE'}
+                </span>
+            </div>
+            <div style="margin-top: 1rem;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">${formatMoney(p1Total)}</div>
+                <div style="font-size: 0.875rem; color: var(--text-muted);">Total Collected</div>
+            </div>
+            <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--success);">
+                ? Goal exceeded by ${formatMoney(p1Total - CONFIG.phase1.goal)}
+            </div>
+        </div>
+
+        <div class="phase-card ${p2Active ? 'phase2-active' : ''}" onclick="showSection('phase2')">
+            <div class="phase-header">
+                <div>
+                    <div class="phase-title">Phase 2: Y12 Bars</div>
+                    <div class="phase-subtitle">Feb-Aug 2026 • 81 Bars</div>
+                </div>
+                <span class="phase-status ${p2Active ? 'status-active-p2' : 'status-pending'}">
+                    ${p2Active ? 'ACTIVE NOW' : 'UPCOMING'}
+                </span>
+            </div>
+            <div style="margin-top: 1rem;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--phase2);">${formatMoney(p2Total)}</div>
+                <div style="font-size: 0.875rem; color: var(--text-muted);">Collected This Phase</div>
+            </div>
+            <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                Monthly: ${formatMoney(CONFIG.phase2.monthlyTarget)}
+            </div>
+        </div>
+
+        <div class="phase-card" onclick="showSection('phase3')">
+            <div class="phase-header">
+                <div>
+                    <div class="phase-title">Phase 3: Y16 Bars</div>
+                    <div class="phase-subtitle">Sep 2026 - Jul 2028</div>
+                </div>
+                <span class="phase-status status-pending">FUTURE</span>
+            </div>
+            <div style="margin-top: 1rem;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--phase3);">${formatMoney(p3Total)}</div>
+                <div style="font-size: 0.875rem; color: var(--text-muted);">Collected So Far</div>
+            </div>
+            <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                Starts: Sep 2026
+            </div>
+        </div>
+    `;
+    document.getElementById('phase-cards-container').innerHTML = cardsHtml;
+    
+    // Dashboard members table
+    let tbody = '';
+    CONFIG.members.forEach(member => {
+        const totals = getMemberTotal(member);
+        tbody += `
+            <tr>
+                <td><strong>${member}</strong></td>
+                <td class="amount ${totals.p1 > 0 ? 'highlight-green' : ''}">${totals.p1 > 0 ? formatMoney(totals.p1) : '-'}</td>
+                <td class="amount ${totals.p2 > 0 ? 'highlight-orange' : ''}">${totals.p2 > 0 ? formatMoney(totals.p2) : '-'}</td>
+                <td class="amount ${totals.p3 > 0 ? 'highlight-purple' : ''}">${totals.p3 > 0 ? formatMoney(totals.p3) : '-'}</td>
+                <td class="amount" style="font-weight: 700;">${formatMoney(totals.total)}</td>
+            </tr>
+        `;
+    });
+    document.querySelector('#dashboard-members-table tbody').innerHTML = tbody;
+}
+
+function initPhase1() {
+    const p1 = CONFIG.phase1;
+    const total = getPhaseTotal(1);
+    
+    document.getElementById('p1-total-collected').textContent = formatMoney(total);
+    
+    // Final standings
+    let standingsHtml = '<div class="member-grid">';
+    CONFIG.members.forEach(member => {
+        const amount = p1.contributions[member] || 0;
+        standingsHtml += `
+            <div class="member-item">
+                <div>
+                    <div style="font-weight: 600; font-size: 1.1rem;">${member}</div>
+                    <div style="font-size: 0.875rem; color: var(--success);">Paid ${formatMoney(amount)}</div>
+                </div>
+                <span class="badge-small status-completed">PAID</span>
+            </div>
+        `;
+    });
+    standingsHtml += '</div>';
+    document.getElementById('p1-final-standings').innerHTML = standingsHtml;
+    
+    // Payment history
+    let logHtml = '';
+    p1.paymentLog.forEach(entry => {
+        logHtml += `
+            <div class="log-entry">
+                <div><strong>${entry.member}</strong> paid ${formatMoney(entry.amount)} <span style="color: var(--text-muted);">- ${entry.date}</span></div>
+            </div>
+        `;
+    });
+    document.getElementById('p1-payment-history').innerHTML = logHtml;
+}
+
+function initPhase2() {
+    const p2 = CONFIG.phase2;
+    const total = getPhaseTotal(2);
+    const monthlyGoal = p2.monthlyTarget;
+    const percent = Math.min(100, (total / (monthlyGoal * p2.totalMonths)) * 100);
+    
+    document.getElementById('p2-total-collected').textContent = formatMoney(total);
+    document.getElementById('p2-overall-percent').textContent = percent.toFixed(1) + '%';
+    document.getElementById('p2-overall-bar').style.width = percent + '%';
+    
+    // Month grid
+    let monthHtml = '';
+    p2.months.forEach((month, idx) => {
+        // Simple logic: if we have payments for this month, mark completed
+        const isActive = idx === 0 && total > 0; // Feb is active if we have any payments
+        const isCompleted = false; // Will update based on date
+        
+        monthHtml += `
+            <div class="month-box ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}">
+                <div class="month-name">${month}</div>
+                <div class="month-amount">${formatMoney(monthlyGoal)}</div>
+            </div>
+        `;
+    });
+    document.getElementById('p2-month-grid').innerHTML = monthHtml;
+    
+    // Member standings
+    let standingsHtml = '<div class="member-grid">';
+    CONFIG.members.forEach(member => {
+        const amount = p2.contributions[member] || 0;
+        const monthlyShare = Math.ceil(monthlyGoal / CONFIG.members.length); // Roughly 74k each
+        
+        standingsHtml += `
+            <div class="member-item">
+                <div>
+                    <div style="font-weight: 600; font-size: 1.1rem;">${member}</div>
+                    <div style="font-size: 0.875rem; color: ${amount > 0 ? 'var(--phase2)' : 'var(--text-muted)'};">
+                        ${amount > 0 ? 'Paid ' + formatMoney(amount) + ' this phase' : 'No payments yet'}
+                    </div>
+                </div>
+                <span class="badge-small ${amount > 0 ? 'status-active-p2' : 'status-pending'}">
+                    ${amount > 0 ? 'Contributing' : 'Pending'}
+                </span>
+            </div>
+        `;
+    });
+    standingsHtml += '</div>';
+    document.getElementById('p2-member-standings').innerHTML = standingsHtml;
+    
+    // Payment history
+    let logHtml = '';
+    if (p2.paymentLog.length > 0) {
+        [...p2.paymentLog].reverse().forEach(entry => {
+            logHtml += `
+                <div class="log-entry p2">
+                    <div>
+                        <strong>${entry.member}</strong> paid ${formatMoney(entry.amount)}
+                        <span style="color: var(--text-muted);"> - ${entry.date}</span>
+                        ${entry.note ? `<span style="color: var(--text-muted); font-size: 0.9rem;"> (${entry.note})</span>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        logHtml = '<div style="color: var(--text-muted); font-style: italic;">No Phase 2 payments recorded yet. Add payments to CONFIG.phase2.paymentLog</div>';
+    }
+    document.getElementById('p2-payment-history').innerHTML = logHtml;
+}
+
+function initPhase3() {
+    let statusHtml = '<div class="member-grid">';
+    CONFIG.members.forEach(member => {
+        const total = getMemberTotal(member);
+        statusHtml += `
+            <div class="member-item">
+                <div>
+                    <div style="font-weight: 600; font-size: 1.1rem;">${member}</div>
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">
+                        Current total: ${formatMoney(total.total)}
+                    </div>
+                </div>
+                <span class="badge-small status-pending">Awaiting Phase 3</span>
+            </div>
+        `;
+    });
+    statusHtml += '</div>';
+    document.getElementById('p3-member-status').innerHTML = statusHtml;
+}
+
+function initMembers() {
+    const grandTotal = getPhaseTotal(1) + getPhaseTotal(2) + getPhaseTotal(3);
+    
+    let tbody = '';
+    CONFIG.members.forEach(member => {
+        const t = getMemberTotal(member);
+        const percent = grandTotal > 0 ? ((t.total / grandTotal) * 100).toFixed(1) : '0';
+        
+        tbody += `
+            <tr>
+                <td><strong>${member}</strong></td>
+                <td class="amount highlight-green">${formatMoney(t.p1)}</td>
+                <td class="amount highlight-orange">${t.p2 > 0 ? formatMoney(t.p2) : '-'}</td>
+                <td class="amount highlight-purple">${t.p3 > 0 ? formatMoney(t.p3) : '-'}</td>
+                <td class="amount" style="font-weight: 700;">${formatMoney(t.total)}</td>
+                <td>${percent}%</td>
+            </tr>
+        `;
+    });
+    document.querySelector('#full-members-table tbody').innerHTML = tbody;
+    
+    // Totals
+    document.getElementById('lifetime-total').textContent = formatMoney(grandTotal);
+    document.getElementById('current-month-total').textContent = formatMoney(getPhaseTotal(2));
+    
+    // Project completion (rough estimate based on total project value ~16.7M)
+    const projectValue = 16677000;
+    const completion = Math.min(100, (grandTotal / projectValue) * 100);
+    document.getElementById('project-completion').textContent = completion.toFixed(1) + '%';
+}
+
+function showSection(sectionId) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    if(sectionId === 'dashboard') initDashboard();
+    if(sectionId === 'phase1') initPhase1();
+    if(sectionId === 'phase2') initPhase2();
+    if(sectionId === 'phase3') initPhase3();
+    if(sectionId === 'members') initMembers();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initDashboard();
+    initPhase1();
+    initPhase2();
+    initPhase3();
+    initMembers();
+});
+</script>
+
+</body>
+</html>
