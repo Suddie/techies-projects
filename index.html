@@ -177,7 +177,7 @@
     <div class="header-content">
         <h1>TECHIES INVESTMENTS</h1>
         <div>
-            <span class="badge">Y10 • Y12 • Y16 Bars</span>
+            <span class="badge">Y10 Â• Y12 Â• Y16 Bars</span>
             <span class="badge">2026-2028</span>
         </div>
         <p style="margin-top: 0.5rem; opacity: 0.9;">Multi-Phase Contribution Tracker</p>
@@ -312,7 +312,7 @@
         <div class="card">
             <h3 class="card-title">Member Contributions (Phase 2)</h3>
             <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
-                Cumulative totals for Phase 2. Edit CONFIG in code to update.
+                Cumulative totals for Phase 2. 
             </p>
             <div id="p2-member-standings"></div>
             
@@ -512,7 +512,7 @@ function initDashboard() {
             <div class="phase-header">
                 <div>
                     <div class="phase-title">Phase 1: Y10 Bars</div>
-                    <div class="phase-subtitle">Jan 2026 • 120 Bars</div>
+                    <div class="phase-subtitle">Jan 2026 Â• 120 Bars</div>
                 </div>
                 <span class="phase-status ${p1Complete ? 'status-completed' : 'status-active'}">
                     ${p1Complete ? 'COMPLETED' : 'ACTIVE'}
@@ -531,7 +531,7 @@ function initDashboard() {
             <div class="phase-header">
                 <div>
                     <div class="phase-title">Phase 2: Y12 Bars</div>
-                    <div class="phase-subtitle">Feb-Aug 2026 • 81 Bars</div>
+                    <div class="phase-subtitle">Feb-Aug 2026 Â• 81 Bars</div>
                 </div>
                 <span class="phase-status ${p2Active ? 'status-active-p2' : 'status-pending'}">
                     ${p2Active ? 'ACTIVE NOW' : 'UPCOMING'}
@@ -681,7 +681,7 @@ function initPhase2() {
             `;
         });
     } else {
-        logHtml = '<div style="color: var(--text-muted); font-style: italic;">No Phase 2 payments recorded yet. Add payments to CONFIG.phase2.paymentLog</div>';
+        logHtml = '<div style="color: var(--text-muted); font-style: italic;">No Phase 2 payments recorded yet.</div>';
     }
     document.getElementById('p2-payment-history').innerHTML = logHtml;
 }
@@ -761,4 +761,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 </body>
+
 </html>
